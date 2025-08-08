@@ -6,10 +6,49 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Form {
+  id        String     @id @default(uuid())
+  title     String
+  slug      String     @unique
+  createdAt DateTime   @default(now())
+
+  fields     Field[]
+  responses  Response[]
+}
+
+model Field {
+  id        String   @id @default(uuid())
+  formId    String
+  label     String
+  type      FieldType
+  required  Boolean  @default(false)
+  order     Int
+
+  form      Form     @relation(fields: [formId], references: [id])
+}
+
+model Response {
+  id        String   @id @default(uuid())
+  formId    String
+  answers   Json
+  createdAt DateTime @default(now())
+
+  form      Form     @relation(fields: [formId], references: [id])
+}
+
+enum FieldType {
+  TEXT
+  TEXTAREA
+  NUMBER
+  EMAIL
+  RADIO
+  CHECKBOX
+}
+
