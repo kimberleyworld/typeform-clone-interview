@@ -10,22 +10,31 @@ interface FormField {
 
 interface CreateFormRequest {
   title: string
-  slug: string
   fields: FormField[]
+}
+
+function generateSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
 }
 
 export async function POST(request: NextRequest) {
   try {
     const body: CreateFormRequest = await request.json()
-    const { title, slug, fields } = body
+    const { title, fields } = body
 
     // Validate required fields
-    if (!title || !slug || !fields || fields.length === 0) {
+    if (!title || !fields || fields.length === 0) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       )
     }
+
+    // Generate slug from title
+    const slug = generateSlug(title)
 
     // Check if slug already exists
     const existingForm = await prisma.form.findUnique({

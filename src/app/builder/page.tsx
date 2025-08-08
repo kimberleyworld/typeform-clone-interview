@@ -15,14 +15,12 @@ interface FormField {
 
 interface FormData {
   title: string
-  slug: string
   fields: FormField[]
 }
 
 export default function FormBuilder() {
   const [formData, setFormData] = useState<FormData>({
     title: '',
-    slug: '',
     fields: []
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -101,18 +99,10 @@ export default function FormBuilder() {
     }))
   }
 
-  const generateSlug = (title: string) => {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '')
-  }
-
   const handleTitleChange = (title: string) => {
     setFormData(prev => ({
       ...prev,
-      title,
-      slug: generateSlug(title)
+      title
     }))
   }
 
@@ -143,11 +133,10 @@ export default function FormBuilder() {
       }
 
       const savedForm = await response.json()
-      alert(`Form "${savedForm.title}" created successfully!`)
+      alert(`Form "${savedForm.title}" created successfully! Form ID: ${savedForm.id}`)
       // Reset form for creating another form
       setFormData({
         title: '',
-        slug: '',
         fields: []
       })
     } catch (error) {
@@ -187,25 +176,6 @@ export default function FormBuilder() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter form title..."
               />
-            </div>
-            
-            <div>
-              <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-2">
-                Form URL
-              </label>
-              <div className="flex">
-                <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                  /forms/
-                </span>
-                <input
-                  type="text"
-                  id="slug"
-                  value={formData.slug}
-                  onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="form-slug"
-                />
-              </div>
             </div>
           </div>
 
