@@ -1,6 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Trash2, Plus } from 'lucide-react'
 
 type FieldType = 'TEXT' | 'TEXTAREA' | 'NUMBER' | 'EMAIL' | 'RADIO' | 'CHECKBOX'
 
@@ -157,136 +163,133 @@ export default function FormBuilder() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background py-8">
       <div className="max-w-4xl mx-auto px-4">
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Form Builder</h1>
-          
-          {/* Form Header */}
-          <div className="mb-8 space-y-4">
-            <div>
-              <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                Form Title
-              </label>
-              <input
-                type="text"
-                id="title"
-                value={formData.title}
-                onChange={(e) => handleTitleChange(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter form title..."
-              />
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-3xl">Form Builder</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-8">
+            {/* Form Header */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Form Title</Label>
+                <Input
+                  id="title"
+                  value={formData.title}
+                  onChange={(e) => handleTitleChange(e.target.value)}
+                  placeholder="Enter form title..."
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Add Field Buttons */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Add Fields</h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-              {fieldTypeOptions.map((option) => (
-                <button
-                  key={option.value}
-                  onClick={() => addField(option.value)}
-                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                >
-                  + {option.label}
-                </button>
+            {/* Add Field Buttons */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">Add Fields</h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                {fieldTypeOptions.map((option) => (
+                  <Button
+                    key={option.value}
+                    onClick={() => addField(option.value)}
+                    variant="outline"
+                    className="justify-start"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    {option.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {/* Form Fields */}
+            <div className="space-y-4">
+              {formData.fields.map((field, index) => (
+                <Card key={field.id}>
+                  <CardHeader className="pb-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CardTitle className="text-lg">Field {index + 1}</CardTitle>
+                        <span className="text-sm text-muted-foreground bg-secondary px-2 py-1 rounded">
+                          {fieldTypeOptions.find(opt => opt.value === field.type)?.label}
+                        </span>
+                      </div>
+                      <Button
+                        onClick={() => removeField(field.id)}
+                        variant="destructive"
+                        size="sm"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Field Label</Label>
+                      <Input
+                        value={field.label}
+                        onChange={(e) => updateField(field.id, { label: e.target.value })}
+                        placeholder="Enter field label..."
+                      />
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`required-${field.id}`}
+                        checked={field.required}
+                        onCheckedChange={(checked) => updateField(field.id, { required: checked as boolean })}
+                      />
+                      <Label htmlFor={`required-${field.id}`}>Required field</Label>
+                    </div>
+
+                    {/* Options for Radio and Checkbox fields */}
+                    {(field.type === 'RADIO' || field.type === 'CHECKBOX') && (
+                      <div className="space-y-2">
+                        <Label>Options</Label>
+                        <div className="space-y-2">
+                          {field.options?.map((option, optionIndex) => (
+                            <div key={optionIndex} className="flex gap-2">
+                              <Input
+                                value={option}
+                                onChange={(e) => updateOption(field.id, optionIndex, e.target.value)}
+                                placeholder={`Option ${optionIndex + 1}`}
+                              />
+                              <Button
+                                onClick={() => removeOption(field.id, optionIndex)}
+                                variant="destructive"
+                                size="sm"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          ))}
+                          <Button
+                            onClick={() => addOption(field.id)}
+                            variant="outline"
+                            size="sm"
+                          >
+                            <Plus className="w-4 h-4 mr-2" />
+                            Add Option
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               ))}
             </div>
-          </div>
 
-          {/* Form Fields */}
-          <div className="space-y-6">
-            {formData.fields.map((field, index) => (
-              <div key={field.id} className="border border-gray-300 rounded-lg p-4 bg-gray-50">
-                <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">
-                    Field {index + 1} - {fieldTypeOptions.find(opt => opt.value === field.type)?.label}
-                  </h3>
-                  <button
-                    onClick={() => removeField(field.id)}
-                    className="text-red-600 hover:text-red-800 font-medium"
-                  >
-                    Remove
-                  </button>
-                </div>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Field Label
-                    </label>
-                    <input
-                      type="text"
-                      value={field.label}
-                      onChange={(e) => updateField(field.id, { label: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter field label..."
-                    />
-                  </div>
-
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      id={`required-${field.id}`}
-                      checked={field.required}
-                      onChange={(e) => updateField(field.id, { required: e.target.checked })}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor={`required-${field.id}`} className="ml-2 block text-sm text-gray-900">
-                      Required field
-                    </label>
-                  </div>
-
-                  {/* Options for Radio and Checkbox fields */}
-                  {(field.type === 'RADIO' || field.type === 'CHECKBOX') && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Options
-                      </label>
-                      <div className="space-y-2">
-                        {field.options?.map((option, optionIndex) => (
-                          <div key={optionIndex} className="flex gap-2">
-                            <input
-                              type="text"
-                              value={option}
-                              onChange={(e) => updateOption(field.id, optionIndex, e.target.value)}
-                              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              placeholder={`Option ${optionIndex + 1}`}
-                            />
-                            <button
-                              onClick={() => removeOption(field.id, optionIndex)}
-                              className="px-3 py-2 text-red-600 hover:text-red-800"
-                            >
-                              Remove
-                            </button>
-                          </div>
-                        ))}
-                        <button
-                          onClick={() => addOption(field.id)}
-                          className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 text-sm"
-                        >
-                          + Add Option
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Save Button */}
-          <div className="mt-8 flex justify-end">
-            <button
-              onClick={saveForm}
-              disabled={isSubmitting}
-              className="px-6 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? 'Saving...' : 'Save Form'}
-            </button>
-          </div>
-        </div>
+            {/* Save Button */}
+            <div className="flex justify-end pt-4">
+              <Button
+                onClick={saveForm}
+                disabled={isSubmitting}
+                size="lg"
+              >
+                {isSubmitting ? 'Saving...' : 'Save Form'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
